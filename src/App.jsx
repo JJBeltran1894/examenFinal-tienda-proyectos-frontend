@@ -1,122 +1,129 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./pages/Login";
+import Navbar from "./components/Navbar";
+import { AuthProvider } from "./context/authContext";
+import { useState } from "react";
+import { TablaProyectos } from "./components/TablaProyectos";
+import { FormularioProyecto } from "./components/FormularioProyecto";
 
-function App() {
-  const [count, setCount] = useState(0)
+const PanelProtegido = () => {
+  const [refrecarKey, setRefrescarKey] = useState(0);
+  const [forzarFormulario, setForzarFormulario] = useState(false);
+
+  const token = localStorage.getItem("token");
+  const rol = localStorage.getItem("rol");
+
+  if (!token) {
+    return <Navigate to="/" />;
+  }
+
+  const manejarProyectoCreado = () => {
+    setRefrescarKey((prev) => prev + 1);
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
+    <div>
+      <Navbar />
+      <div className="dashboard-container">
+        <div
+          style={{
+            marginBottom: "30px",
+            borderBottom: "1px solid var(--border-color)",
+            paddingBottom: "20px",
+          }}
+        >
+          <h2 style={{ fontSize: "28px", margin: "0 0 4px 0" }}>
+            Consola de Operaciones
+          </h2>
+          <p style={{ margin: 0 }}>
+            Conectado como rol corporativo:{" "}
+            <span
+              style={{
+                color: rol === "ADMIN" ? "#10b981" : "#38bdf8",
+                fontWeight: "700",
+                fontFamily: "var(--mono)",
+              }}
+            >
+              [{rol}]
+            </span>
           </p>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
 
-      <div className="ticks"></div>
+        {rol === "ADMIN" && (
+          <FormularioProyecto onProyectoCreado={manejarProyectoCreado} />
+        )}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+        {rol === "USER" && (
+          <div style={{ marginBottom: "25px" }}>
+            <div
+              style={{
+                padding: "16px",
+                backgroundColor: "#0b121f",
+                borderRadius: "8px",
+                border: "1px dashed #223554",
+                display: "flex",
+                alignItems: "center",
+                justifyContext: "space-between",
+              }}
+            >
+              <div>
+                <h4 style={{ margin: "0 0 4px 0", color: "#fff" }}>
+                  🔒 Modo de Seguridad Activo
+                </h4>
+                <p style={{ margin: 0, fontSize: "13px" }}>
+                  Los flujos de edición se encuentran ocultos para cuentas sin
+                  privilegios elevados.
+                </p>
+              </div>
+              <button
+                onClick={() => setForzarFormulario(!forzarFormulario)}
+                className="btn-action-bypass"
+              >
+                {forzarFormulario
+                  ? "🔒 Ocultar Inyector Forzado"
+                  : "💉 Simular Bypass Front (Exponer Formulario de ADMIN)"}
+              </button>
+            </div>
+
+            {forzarFormulario && (
+              <div style={{ marginTop: "24px" }}>
+                <FormularioProyecto onProyectoCreado={manejarProyectoCreado} />
+              </div>
+            )}
+          </div>
+        )}
+
+        <div style={{ marginTop: "30px" }}>
+          <h3
+            style={{
+              fontSize: "18px",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              color: "var(--text-muted)",
+            }}
+          >
+            📋 Catálogo Maestro de Proyectos
+          </h3>
+          <TablaProyectos key={refrecarKey} />
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      </div>
+    </div>
+  );
+};
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+export function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/panel" element={<PanelProtegido />} />
+          <Route path="/panel/nueva-tarea" element={<PanelProtegido />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;
